@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['\\(', '\\)']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async src="mathjax/es5/tex-svg.js">
+    </script>
+  </head>
+  <body>
+    <div class="content">
+      <div class="conjecture">
+        For the sequence
+        \begin{align}
+          a_0&\in\mathbb{N} \\
+          a_{k+1}&= \left\{
+            \begin{array}{rl}
+              a_k \div 2 & \quad2\mid a_k \\
+              3a_k+1 & \quad2\nmid a_k
+            \end{array}
+          \right.
+        \end{align}
+        the Collatz conjecture states that
+        \begin{equation}
+          \forall\,a_0\,\exists\,k\text{ such that } a_k=1
+        \end{equation}
+      </div>
+      <hr>
+    </div>
+    <style>
+      .content {
+        max-width: 40em;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .conjecture {
+        text-align: center;
+      }
+    </style>
+  </body>
+</html>
