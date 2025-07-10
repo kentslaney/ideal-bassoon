@@ -15,11 +15,88 @@
     </script>
     <script type="text/javascript" id="MathJax-script" async src="mathjax/es5/tex-svg.js"></script>
     <script>
+      function rebase(value, inbase, outbase) {
+        let output = [];
+        for(let remainder of value) {
+          for(let digit = 0; digit < output.length; digit++) {
+            remainder = inbase * output[digit] + remainder;
+            output[digit] = remainder % outbase;
+            remainder = Math.floor(remainder / outbase);
+          }
+          while(remainder) {
+            output.push(remainder % outbase);
+            remainder = Math.floor(remainder / outbase);
+          }
+        }
+        return output.reverse();
+      }
+
+      function translate(value, inalphabet, outalphabet) {
+        let rebased = rebase(value.split("").map(x => inalphabet.indexOf(x)),
+          inalphabet.length, outalphabet.length);
+        return rebased.map(x => outalphabet[x]).join("");
+      }
+
+      const b3enc = x => translate(x.toString(), "0123456789", "012")
+      const b3dec = x => parseInt(translate(x, "012", "0123456789"))
+
+      function b3ltr(x) {
+        let carry = 0;
+        return x.split("").map(y => {
+          let res = carry ? y === "0" ? "1" : "2" : y === "2" ? "1" : "0"
+          carry ^= y === "1"
+          return res
+        }).join("") + (carry === 0 ? "" : "2")
+      }
+
+      function b3seq(x) {
+        console.assert(x !== "")
+        let seq = [x], b10 = [b3dec(x)], pre = [0, 0], cur = 0
+        while (x !== "1") {
+          const y = b3ltr(x)
+          seq.push(y)
+          b10.push(b3dec(y))
+          x = y.replace(/^0*/, "")
+          pre.push(cur += y.length - x.length)
+        }
+        return [seq, b10, pre]
+      }
+
       window.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("a").forEach(el => {
           if (el.childNodes.length === 1 && el.firstElementChild === null)
             el.innerText = el.innerText.trim()
         })
+
+        const e0b10 = document.getElementById("ex0base10")
+        const e0b03 = document.getElementById("ex0base03")
+        const ex0el = document.getElementById("ex0")
+        const selall = e => { e.target.select() }
+        const ex0pad = 8
+        const ex0 = x => {
+          const [seq, b10, pre] = b3seq(x)
+          const s10 = b10.map(x => x.toString())
+          const lines = seq.map((x, i) => " ".repeat(pre[i]) + x)
+          const align = ex0pad + lines.slice(-1)[0].length + Math.max(
+            ...s10.map(x => x.length))
+          const res = lines.map((x, i) =>
+            x + " ".repeat(align - x.length - s10[i].length) + s10[i])
+          ex0el.innerText = res.join("\n")
+        }
+
+        e0b10.addEventListener("focus", selall, { "passive": true })
+        e0b03.addEventListener("focus", selall, { "passive": true })
+        e0b10.addEventListener("input", e => {
+          const x = b3enc(e0b10.value || e0b10.placeholder)
+          e0b03.value = e0b10.value && x
+          ex0(x)
+        }, { "passive": true })
+        e0b03.addEventListener("input", e => {
+          const x = e0b03.value || e0b03.placeholder
+          e0b10.value = e0b03.value && b3dec(x)
+          ex0(x)
+        }, { "passive": true })
+        if (e0b10.value && e0b10.value !== e0b10.placeholder) ex0(e0b03.value)
       })
     </script>
   </head>
@@ -74,8 +151,14 @@
         <li>With the carry bit on, \(0\to1\) and \(2\to2\)</li>
         <li>If the number ends with the carry bit on, append 2</li>
       </ul>
-      using \(7=21_3\)
-<pre>
+      Using
+      <input type="number" value="7"  placeholder="7"  size="2" id="ex0base10">
+      </input>
+      =
+      <input type="number" value="21" placeholder="21" size="4" id="ex0base03">
+      </input>
+      <sub>3</sub>
+<pre id="ex0">
 21              7
 102            11
 0122           17
@@ -114,6 +197,29 @@
 
       .conjecture {
         text-align: center;
+      }
+
+      input[type=number] {
+        font-family: inherit;
+        border-color: #aaa;
+        border-width: 0 0 0.2em 0;
+        outline: 0;
+        text-align: right;
+        font-size: inherit;
+      }
+
+      input[type=number]:focus {
+        border-color: #007aff;
+      }
+
+      /* https://stackoverflow.com/a/4298216/3476782 */
+      input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      input[type=number] {
+        -moz-appearance: textfield;
       }
     </style>
   </body>
