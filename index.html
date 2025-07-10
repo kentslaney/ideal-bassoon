@@ -13,7 +13,14 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async src="mathjax/es5/tex-svg.js">
+    <script type="text/javascript" id="MathJax-script" async src="mathjax/es5/tex-svg.js"></script>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("a").forEach(el => {
+          if (el.childNodes.length === 1 && el.firstElementChild === null)
+            el.innerText = el.innerText.trim()
+        })
+      })
     </script>
   </head>
   <body>
@@ -35,6 +42,53 @@
         \end{equation}
       </div>
       <hr>
+      In base 2, the process can be rephrased as repeatedly
+      <ol>
+        <li>Appending 1 to the end of the number</li>
+        <li>Adding the result to the original number</li>
+        <li>Removing trailing 0s</li>
+      </ol>
+      For example (via
+      <!-- oldid=1298684967 as of writing -->
+      <a href="https://en.wikipedia.org/wiki/Collatz_conjecture#Example">
+        Wikipedia
+      </a>), \(7=111_2\)
+<pre>
+         111         7
+        <u>111<b>1</b></u>
+       1011<s>0</s>        11
+      <u>1011<b>1</b></u>
+     10001<s>0</s>         17
+    <u>10001<b>1</b></u>
+    1101<s>00</s>          13
+   <u>1101<b>1</b></u>
+  101<s>000</s>             5
+ <u>101<b>1</b></u>
+1<s>0000</s>                1
+</pre>
+      The process can be rephrased in base 3 with a 1 (carry) bit left-to-right
+      state-machine.
+      <ul>
+        <li>Initially, the carry bit is off, so \(0\to0\) and \(2\to1\)</li>
+        <li>With the carry bit off, \(1\to0\), flipping the carry bit on</li>
+        <li>With the carry bit on, \(1\to2\), flipping the carry bit off</li>
+        <li>With the carry bit on, \(0\to1\) and \(2\to2\)</li>
+        <li>If the number ends with the carry bit on, append 2</li>
+      </ul>
+      using \(7=21_2\)
+<pre>
+21              7
+102            11
+0122           17
+ 0222          26
+  111          13
+  0202         20
+   101         10
+   012          5
+    022         8
+     02         2
+      1         1
+</pre>
     </div>
     <style>
       .content {
