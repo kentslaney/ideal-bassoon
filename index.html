@@ -49,8 +49,7 @@
         <li>Removing trailing 0s</li>
       </ol>
       For example (via
-      <!-- oldid=1298684967 as of writing -->
-      <a href="https://en.wikipedia.org/wiki/Collatz_conjecture#Example">
+      <a href="https://en.wikipedia.org/w/index.php?title=Collatz_conjecture&oldid=1298684967#Example">
         Wikipedia
       </a>), \(7=111_2\)
 <pre>
@@ -86,9 +85,25 @@
    101         10
    012          5
     022         8
+     11         4
      02         2
       1         1
 </pre>
+      If the carry bit is off for the last digit, the two ways to end up with 0
+      are
+      <ol>
+        <li>the digit is already 0</li>
+        <li>
+          the digit is a 1, in which case the number will end with the carry bit
+          on and a 2 will be appended, meaning the new number will not end in 0
+        </li>
+      </ol>
+      If the carry bit is on for the last digit, there is no way to end up with
+      a zero. This means that once a number \(\not\equiv 0\ (\text{mod}\ 3)\)
+      it will stay that way. We can upper bound the number of steps that end in
+      0 since it requires that the right side stays fixed, meaning the number is
+      only being divided by 2. Going forwards, numbers ending in 0 can be
+      ignored by this version of the process.
     </div>
     <style>
       .content {
