@@ -172,21 +172,10 @@
      02         2
       1         1
 </pre>
-      If the carry bit is off for the last digit, the two ways to end up with 0
-      are
-      <ol>
-        <li>the digit is already 0</li>
-        <li>
-          the digit is a 1, in which case the number will end with the carry bit
-          on and a 2 will be appended, meaning the new number will not end in 0
-        </li>
-      </ol>
-      If the carry bit is on for the last digit, there is no way to end up with
-      a zero. This means that once a number \(\not\equiv 0\ (\text{mod}\ 3)\)
-      it will stay that way. We can upper bound the number of steps that end in
-      0 since it requires that the right side stays fixed, meaning the number is
-      only being divided by 2. Going forwards, numbers ending in 0 can be
-      ignored by this version of the process.
+      Numbers ending in 0 can be ignored since dividing by 2 doesn't change
+      divisibility by 3 and \(3a_k+1\not\equiv 0\ (\text{mod}\ 3)\). The number
+      of steps that the starting number ends in 0 is upper bounded by
+      \(\log_2 a_0\).
     </div>
     <style>
       .content {
