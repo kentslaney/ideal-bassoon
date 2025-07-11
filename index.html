@@ -15,6 +15,7 @@
     </script>
     <script type="text/javascript" id="MathJax-script" async src="mathjax/es5/tex-svg.js"></script>
     <script>
+      "use strict"
       function rebase(value, inbase, outbase) {
         let output = [];
         for(let remainder of value) {
@@ -68,12 +69,104 @@
             el.innerText = el.innerText.trim()
         })
 
+        // ex1
+        const ex1el = document.getElementById("ex1")
+        const ex1cols = document.getElementById("ex1cols")
+        const ex1carry = document.getElementById("ex1carry")
+        const ex1style = window.getComputedStyle(ex1carry)
+        const ex1timex = parseFloat(ex1style.getPropertyValue("--timing-x"))
+        const ex1timey = parseFloat(ex1style.getPropertyValue("--timing-y"))
+        function ex1digit() {
+          const col = ex1cols.appendChild(document.createElement("div"))
+          for (let i = 0; i < 3; i++) {
+            col.appendChild(document.createElement("div"))
+          }
+          return col;
+        }
+        const ex1sizing = ex1digit()
+        const ex1cover = Math.floor(
+          ex1cols.getBoundingClientRect().width /
+          ex1sizing.getBoundingClientRect().width) - 1
+        for (var i = 0; i < ex1cover; i++) ex1digit()
+        let ex1init = "", ex1val = ""
+        function ex1(x) {
+          ex1val = ex1init = x;
+          [...ex1cols.children].forEach(y => {
+            y.style.removeProperty("--active")
+            y.classList.remove("active")
+          })
+          x.split("").map((y, i) => {
+            ex1cols.children[i].style.setProperty("--active", y)
+            ex1cols.children[i].classList.add("active")
+          })
+          ex1el.classList.remove("started")
+          ex1play.classList.remove("disabled")
+        }
+        let timeouts = new Set(), ratelimit;
+        document.getElementById("ex1reset").addEventListener("click", e => {
+          window.clearTimeout(ratelimit)
+          ratelimit = undefined
+          for (let i of timeouts) window.clearTimeout(i)
+          timeouts.clear()
+          while (ex1carry.children.length > 1)
+            ex1carry.removeChild(ex1carry.lastElementChild)
+          ex1(ex1init)
+        })
+        const ex1run = auto => {
+          if (ratelimit !== undefined) return
+          const carrier = ex1carry.appendChild(document.createElement("div"))
+          const prev = ex1val
+          const update = ex1val = b3ltr(ex1val)
+          ex1el.classList.add("started")
+          carrier.style.setProperty("--digit", -1)
+          function goto(pos) {
+            while (ex1cols.children.length <= pos) ex1digit()
+            carrier.style.setProperty("--digit", pos)
+            const timeout0 = window.setTimeout(() => {
+              timeouts.delete(timeout0)
+              if (prev[pos] === "1") {
+                carrier.classList.toggle("carry")
+              }
+              if (prev[pos] !== update[pos]) {
+                ex1cols.children[pos].style.setProperty("--active", update[pos])
+                ex1cols.children[pos].classList.add("active")
+                if (pos < update.length - 1) {
+                  const timeout1 = window.setTimeout(() => {
+                    timeouts.delete(timeout1)
+                    goto(pos + 1)
+                  }, ex1timey * 1000)
+                  timeouts.add(timeout1)
+                }
+              } else if (pos < update.length - 1) {
+                goto(pos + 1)
+              }
+              if (pos == update.length - 1) {
+                ex1carry.removeChild(carrier)
+              }
+            }, ex1timex * 1000)
+            timeouts.add(timeout0)
+          }
+          window.setTimeout(() => goto(0), 100)
+          ratelimit = window.setTimeout(() => {
+            ratelimit = undefined;
+            if (auto) ex1run(true)
+          }, (ex1timex + ex1timey) * 2000)
+        }
+        const ex1play = document.getElementById("ex1play")
+        ex1play.addEventListener("click", e =>
+          ex1run(false))
+        document.getElementById("ex1ff").addEventListener("click", e => {
+          ex1play.classList.add("disabled")
+          ex1run(true)
+        })
+
+        // ex0
         const e0b10 = document.getElementById("ex0base10")
         const e0b03 = document.getElementById("ex0base03")
         const ex0el = document.getElementById("ex0")
         const selall = e => { e.target.select() }
         const ex0pad = 8
-        const ex0 = x => {
+        function ex0(x) {
           const [seq, b10, pre] = b3seq(x)
           const s10 = b10.map(x => x.toString())
           const lines = seq.map((x, i) => " ".repeat(pre[i]) + x)
@@ -82,6 +175,7 @@
           const res = lines.map((x, i) =>
             x + " ".repeat(align - x.length - s10[i].length) + s10[i])
           ex0el.innerText = res.join("\n")
+          ex1(x)
         }
 
         e0b10.addEventListener("focus", selall, { "passive": true })
@@ -97,6 +191,7 @@
           ex0(x)
         }, { "passive": true })
         if (e0b10.value && e0b10.value !== e0b10.placeholder) ex0(e0b03.value)
+        else ex1(e0b03.value)
       })
     </script>
   </head>
@@ -119,6 +214,7 @@
         \end{equation}
       </div>
       <hr>
+
       In base 2, the process can be rephrased as repeatedly
       <ol>
         <li>Appending 1 to the end of the number</li>
@@ -151,6 +247,7 @@
         <li>With the carry bit on, \(0\to1\) and \(2\to2\)</li>
         <li>If the number ends with the carry bit on, append 2</li>
       </ul>
+
       Using
       <input type="number" value="7"  placeholder="7"  size="2" id="ex0base10">
       </input>
@@ -176,6 +273,14 @@
       divisibility by 3 and \(3a_k+1\not\equiv 0\ (\text{mod}\ 3)\). The number
       of steps that the starting number ends in 0 is upper bounded by
       \(\log_2 a_0\).
+
+      <div id="ex1">
+        <div id="ex1play"></div>
+        <div id="ex1carry"><div></div></div>
+        <div id="ex1ff"></div>
+        <div id="ex1reset"></div>
+        <div id="ex1cols"></div>
+      </div>
     </div>
     <style>
       .content {
@@ -209,6 +314,188 @@
 
       input[type=number] {
         -moz-appearance: textfield;
+      }
+
+      #ex1 {
+        --timing-x: 0.5s;
+        --timing-y: 0.5s;
+        margin: 1em 0;
+        position: relative;
+      }
+
+      #ex1play {
+        width: 2em;
+        height: 2em;
+        top: 1em;
+        left: 1em;
+        position: absolute;
+        background: #007aff;
+        border-radius: 100%;
+      }
+
+      #ex1play.disabled {
+        background: #aaa;
+      }
+
+      #ex1play::before {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 0;
+
+        --symbol-height: 1em;
+        --playback-color: #fff;
+        --padding-value: 0.5em;
+        --h: calc(var(--symbol-height) / 2);
+        --w: calc(var(--symbol-height) * sqrt(3) / 2);
+        border-color: transparent var(--playback-color);
+        border-style: solid;
+        border-width: var(--h) 0px var(--h) var(--w);
+
+        --tri-offset: calc((sqrt(3) - 3 / 2) * var(--symbol-height) / 2);
+        margin-top: var(--padding-value);
+        margin-bottom: var(--padding-value);
+        margin-left: calc(var(--padding-value) + var(--symbol-height) / 4);
+        margin-right: calc(var(--padding-value) - var(--tri-offset));
+      }
+
+      #ex1ff {
+        width: 2em;
+        height: 2em;
+        top: 7em;
+        left: 1em;
+        position: absolute;
+        background: #007aff;
+        border-radius: 100%;
+      }
+
+      #ex1.started #ex1ff {
+        display: none;
+      }
+
+      #ex1ff::before, #ex1ff::after {
+        content: '';
+        border-width: 0.6em;
+        border-style: solid;
+        border-color: transparent transparent transparent #fff;
+        width: 0;
+        height: 0;
+        position: absolute;
+        left: 0.6em;
+        top: 0.4em;
+      }
+
+      #ex1ff::after {
+        left: 1.1em;
+      }
+
+      #ex1reset {
+        --back: red;
+        width: 2em;
+        height: 2em;
+        top: 7em;
+        left: 1em;
+        position: absolute;
+        background: var(--back);
+        border-radius: 100%;
+        display: none;
+      }
+
+      #ex1.started #ex1reset {
+        display: initial;
+      }
+
+      #ex1reset::before {
+        content: '';
+        width: 0.8em;
+        height: 0.8em;
+        border-radius: 100%;
+        position: absolute;
+        margin: 0.4em;
+        border: 0.2em solid #fff;
+      }
+
+      #ex1reset::after {
+        content: '';
+        width: 0;
+        height: 0;
+        position: absolute;
+        border-width: 0.4em 0.4em 0.1em 0.4em;
+        border-style: solid;
+        border-color: #fff var(--back) var(--back) var(--back);
+        top: 0.6em;
+        left: 1.1em;
+        transform: rotate(-30deg);
+      }
+
+      #ex1carry {
+        --digit: -1;
+      }
+
+      #ex1carry > div {
+        width: 2em;
+        height: 2em;
+        top: 4em;
+        left: calc(4em + 3em * var(--digit));
+        position: absolute;
+        z-index: 1;
+        transform: rotate(0deg);
+        transition: left var(--timing-x), transform var(--timing-y);
+      }
+
+      #ex1carry > .carry {
+        transform: rotate(180deg);
+      }
+
+      #ex1carry > div::before {
+        content: '';
+        position: absolute;
+        width: 1.8em;
+        height: 1.8em;
+        border-width: 0 0.2em 0.2em 0;
+        transform: rotate(45deg) scale(calc(1 / sqrt(2)));
+        border-style: solid;
+        border-color: #000;
+      }
+
+      #ex1carry > div::after {
+        content: '';
+        position: absolute;
+        width: 0.2em;
+        height: 1.8em;
+        left: 0.9em;
+        background: #000;
+        transform: scaleX(calc(1 / sqrt(2)));
+      }
+
+      #ex1cols {
+        margin-left: 3em;
+        text-wrap: nowrap;
+      }
+
+      #ex1cols > div {
+        display: inline-block;
+        position: relative;
+      }
+
+      #ex1cols > div > div {
+        width: 2em;
+        height: 2em;
+        background: #aaa;
+        border-radius: 100%;
+        margin: 1em 0 1em 1em;
+      }
+
+      #ex1cols > .active::after {
+        content: '';
+        position: absolute;
+        width: 2em;
+        height: 2em;
+        left: 1em;
+        top: calc(7em - var(--active) * 3em);
+        transition: top var(--timing-y);
+        background: green;
+        border-radius: 100%;
       }
     </style>
   </body>
