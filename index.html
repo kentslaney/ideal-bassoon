@@ -304,6 +304,21 @@
         text-align: center;
       }
 
+      s {
+        text-decoration: none;
+        position: relative
+      }
+
+      s::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        left: 0;
+        height: 0.15em;
+        background: #000;
+        top: 0.5em;
+      }
+
       input[type=number] {
         font-family: inherit;
         border-color: #aaa;
