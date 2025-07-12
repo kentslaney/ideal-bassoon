@@ -63,6 +63,8 @@
         return [seq, b10, pre]
       }
 
+      // TODO: the trivial loop has alternating timing but it doesn't look like
+      //       it should need to
       function b3time(x, y, z) {
         return 1 + y.split("").map((w, i) => +(w === z[i]) - (w === x[i]))
           .reduce(([a, b], c) => [a + c, Math.max(b, a + c)], [0, 0])[1]
@@ -91,7 +93,7 @@
         const ex1sizing = ex1digit()
         const ex1cover = Math.floor(
           ex1cols.getBoundingClientRect().width /
-          ex1sizing.getBoundingClientRect().width) - 1
+          ex1sizing.getBoundingClientRect().width) - 1 // TODO: breaks on resize
         for (var i = 0; i < ex1cover; i++) ex1digit()
         let ex1init = "", ex1val = "", ex1next = ""
         function ex1(x) {
@@ -160,8 +162,7 @@
           }, (ex1timex + ex1timey * b3time(prev, update, next)) * 1000)
         }
         const ex1play = document.getElementById("ex1play")
-        ex1play.addEventListener("click", e =>
-          ex1run(false))
+        ex1play.addEventListener("click", e => ex1run(false))
         document.getElementById("ex1ff").addEventListener("click", e => {
           ex1play.classList.add("disabled")
           ex1run(true)
@@ -281,6 +282,7 @@
       of steps that the starting number ends in 0 is upper bounded by
       \(\log_2 a_0\).
 
+      <!-- TODO: auto-scroll x-overflow -->
       <div id="ex1">
         <div id="ex1play"></div>
         <div id="ex1carry"><div></div></div>
