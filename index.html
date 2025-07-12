@@ -63,6 +63,11 @@
         return [seq, b10, pre]
       }
 
+      function b3time(x, y, z) {
+        return 1 + y.split("").map((w, i) => +(w === z[i]) - (w === x[i]))
+          .reduce(([a, b], c) => [a + c, Math.max(b, a + c)], [0, 0])[1]
+      }
+
       window.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("a").forEach(el => {
           if (el.childNodes.length === 1 && el.firstElementChild === null)
@@ -88,10 +93,11 @@
           ex1cols.getBoundingClientRect().width /
           ex1sizing.getBoundingClientRect().width) - 1
         for (var i = 0; i < ex1cover; i++) ex1digit()
-        let ex1init = "", ex1val = ""
+        let ex1init = "", ex1val = "", ex1next = ""
         function ex1(x) {
-          ex1val = ex1init = x;
-          [...ex1cols.children].forEach(y => {
+          ex1val = ex1init = x
+          ex1next = b3ltr(x)
+          ;[...ex1cols.children].forEach(y => {
             y.style.removeProperty("--active")
             y.classList.remove("active")
           })
@@ -102,28 +108,29 @@
           ex1el.classList.remove("started")
           ex1play.classList.remove("disabled")
         }
-        let timeouts = new Set(), ratelimit;
+        let ex1timeouts = new Set(), ex1cooldown;
         document.getElementById("ex1reset").addEventListener("click", e => {
-          window.clearTimeout(ratelimit)
-          ratelimit = undefined
-          for (let i of timeouts) window.clearTimeout(i)
-          timeouts.clear()
+          window.clearTimeout(ex1cooldown)
+          ex1cooldown = undefined
+          for (let i of ex1timeouts) window.clearTimeout(i)
+          ex1timeouts.clear()
           while (ex1carry.children.length > 1)
             ex1carry.removeChild(ex1carry.lastElementChild)
           ex1(ex1init)
         })
         const ex1run = auto => {
-          if (ratelimit !== undefined) return
+          if (ex1cooldown !== undefined) return
           const carrier = ex1carry.appendChild(document.createElement("div"))
           const prev = ex1val
-          const update = ex1val = b3ltr(ex1val)
+          const update = ex1val = ex1next
+          const next = ex1next = b3ltr(ex1val)
           ex1el.classList.add("started")
           carrier.style.setProperty("--digit", -1)
           function goto(pos) {
             while (ex1cols.children.length <= pos) ex1digit()
             carrier.style.setProperty("--digit", pos)
             const timeout0 = window.setTimeout(() => {
-              timeouts.delete(timeout0)
+              ex1timeouts.delete(timeout0)
               if (prev[pos] === "1") {
                 carrier.classList.toggle("carry")
               }
@@ -132,10 +139,10 @@
                 ex1cols.children[pos].classList.add("active")
                 if (pos < update.length - 1) {
                   const timeout1 = window.setTimeout(() => {
-                    timeouts.delete(timeout1)
+                    ex1timeouts.delete(timeout1)
                     goto(pos + 1)
                   }, ex1timey * 1000)
-                  timeouts.add(timeout1)
+                  ex1timeouts.add(timeout1)
                 }
               } else if (pos < update.length - 1) {
                 goto(pos + 1)
@@ -144,13 +151,13 @@
                 ex1carry.removeChild(carrier)
               }
             }, ex1timex * 1000)
-            timeouts.add(timeout0)
+            ex1timeouts.add(timeout0)
           }
           window.setTimeout(() => goto(0), 100)
-          ratelimit = window.setTimeout(() => {
-            ratelimit = undefined;
+          ex1cooldown = window.setTimeout(() => {
+            ex1cooldown = undefined;
             if (auto) ex1run(true)
-          }, (ex1timex + ex1timey) * 2000)
+          }, (ex1timex + ex1timey * b3time(prev, update, next)) * 1000)
         }
         const ex1play = document.getElementById("ex1play")
         ex1play.addEventListener("click", e =>
@@ -191,7 +198,7 @@
           ex0(x)
         }, { "passive": true })
         if (e0b10.value && e0b10.value !== e0b10.placeholder) ex0(e0b03.value)
-        else ex1(e0b03.value)
+        else ex1(e0b03.placeholder)
       })
     </script>
   </head>
