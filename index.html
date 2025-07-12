@@ -94,6 +94,7 @@
         for (var i = 0; i < ex1cover; i++) ex1digit()
         let ex1init = "", ex1val = "", ex1next = ""
         function ex1(x) {
+          window.cancelAnimationFrame(ex1warmup)
           window.clearTimeout(ex1cooldown)
           ex1cooldown = undefined
           for (let i of ex1timeouts) window.clearTimeout(i)
@@ -113,7 +114,7 @@
           ex1el.classList.remove("started")
           ex1play.classList.remove("disabled")
         }
-        let ex1timeouts = new Set(), ex1cooldown;
+        let ex1timeouts = new Set(), ex1cooldown, ex1warmup;
         document.getElementById("ex1reset").addEventListener("click", e => {
           ex1(ex1init)
         })
@@ -126,6 +127,7 @@
           ex1el.classList.add("started")
           carrier.style.setProperty("--digit", -1)
           function goto(pos) {
+            ex1warmup = undefined
             while (ex1cols.children.length <= pos) ex1digit()
             carrier.style.setProperty("--digit", pos)
             const timeout0 = window.setTimeout(() => {
@@ -147,13 +149,13 @@
                 goto(pos + 1)
               }
               if (pos == update.length - 1) {
-                // TODO: it's possible for the carrier to already be deleted?
                 ex1carry.removeChild(carrier)
               }
             }, ex1timex * 1000)
             ex1timeouts.add(timeout0)
           }
-          window.setTimeout(() => goto(0), 100)
+          ex1warmup = window.requestAnimationFrame(() =>
+            ex1warmup = window.requestAnimationFrame(() => goto(0)))
           ex1cooldown = window.setTimeout(() => {
             ex1cooldown = undefined;
             if (auto) ex1run(true)
