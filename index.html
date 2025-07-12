@@ -225,9 +225,9 @@
 
       In base 2, the process can be rephrased as repeatedly
       <ol>
-        <li>Appending 1 to the end of the number</li>
-        <li>Adding the result to the previous number</li>
-        <li>Removing trailing 0s</li>
+        <li>Removing trailing 0s (removes factors of 2 until odd)</li>
+        <li>Appending 1 to the end of the number (\(=2a_k+1\))</li>
+        <li>Adding the result to the previous number (\(=3a_k+1\))</li>
       </ol>
       For example (via
       <a href="https://en.wikipedia.org/w/index.php?title=Collatz_conjecture&oldid=1298684967#Example">
@@ -255,6 +255,12 @@
         <li>With the carry bit on, \(0\to1\) and \(2\to2\)</li>
         <li>If the number ends with the carry bit on, append 2</li>
       </ul>
+      In base 3, the parity of the number is equal to the parity of the popcount
+      for 1s digits. The number is only divided by 2 if it is even, meaning that
+      the carry is the same going left to right as right to left. If the number
+      ends with the carry bit on, the previous step was odd, meaning a 1 is
+      missing (to get \(3a_k+1\)), which gets converted to a 2 to end the carry.
+      <br /><br />
 
       Using
       <input type="number" value="7"  placeholder="7"  size="2" id="ex0base10">
