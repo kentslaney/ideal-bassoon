@@ -97,6 +97,12 @@
         for (var i = 0; i < ex1cover; i++) ex1digit()
         let ex1init = "", ex1val = "", ex1next = ""
         function ex1(x) {
+          window.clearTimeout(ex1cooldown)
+          ex1cooldown = undefined
+          for (let i of ex1timeouts) window.clearTimeout(i)
+          ex1timeouts.clear()
+          while (ex1carry.children.length > 1)
+            ex1carry.removeChild(ex1carry.lastElementChild)
           ex1val = ex1init = x
           ex1next = b3ltr(x)
           ;[...ex1cols.children].forEach(y => {
@@ -112,12 +118,6 @@
         }
         let ex1timeouts = new Set(), ex1cooldown;
         document.getElementById("ex1reset").addEventListener("click", e => {
-          window.clearTimeout(ex1cooldown)
-          ex1cooldown = undefined
-          for (let i of ex1timeouts) window.clearTimeout(i)
-          ex1timeouts.clear()
-          while (ex1carry.children.length > 1)
-            ex1carry.removeChild(ex1carry.lastElementChild)
           ex1(ex1init)
         })
         const ex1run = auto => {
