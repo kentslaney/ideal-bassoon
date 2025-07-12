@@ -138,17 +138,19 @@
               if (prev[pos] !== update[pos]) {
                 ex1cols.children[pos].style.setProperty("--active", update[pos])
                 ex1cols.children[pos].classList.add("active")
-                if (pos < update.length - 1) {
+                if (prev[pos] !== undefined) {
                   const timeout1 = window.setTimeout(() => {
                     ex1timeouts.delete(timeout1)
-                    goto(pos + 1)
+                    if (pos < update.length - 1) goto(pos + 1)
+                    else ex1carry.removeChild(carrier)
                   }, ex1timey * 1000)
                   ex1timeouts.add(timeout1)
+                } else {
+                  ex1carry.removeChild(carrier)
                 }
               } else if (pos < update.length - 1) {
                 goto(pos + 1)
-              }
-              if (pos == update.length - 1) {
+              } else if (pos == update.length - 1) {
                 ex1carry.removeChild(carrier)
               }
             }, ex1timex * 1000)
