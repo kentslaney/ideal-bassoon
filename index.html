@@ -91,8 +91,13 @@
         }
         const ex1cover = window.getComputedStyle(ex1el)
           .getPropertyValue("--cols-cover")
-        for (var i = 0; i < ex1cover; i++) ex1digit()
-        let ex1init = "", ex1val = "", ex1next = ""
+        const ex1sizing = ex1digit().getBoundingClientRect().width
+        for (var i = 1; i < ex1cover; i++) ex1digit()
+        const ex1resize = new ResizeObserver(entries => entries.map(entry => {
+          ex1el.style.setProperty("--cols", entry.contentRect.width / ex1sizing)
+        }))
+        ex1resize.observe(ex1cols)
+        let ex1init = "", ex1val = "", ex1next = "", ex1pressure = 0
         function ex1(x) {
           window.cancelAnimationFrame(ex1warmup)
           window.clearTimeout(ex1cooldown)
@@ -112,26 +117,37 @@
             ex1cols.children[i].classList.add("active")
           })
           ex1el.classList.remove("started")
+          ex1el.style.removeProperty("--zeros")
+          ex1el.style.setProperty("--pressure", ex1pressure = x.length)
           ex1play.classList.remove("disabled")
         }
         let ex1timeouts = new Set(), ex1cooldown, ex1warmup;
         document.getElementById("ex1reset").addEventListener("click", e => {
           ex1(ex1init)
         })
+        // TODO: if !auto skip as many scrolled-past zeros as possible
+        // TODO: the last carry can scroll non-zeros off-screen left
         const ex1run = auto => {
           if (ex1cooldown !== undefined) return
           const carrier = ex1carry.appendChild(document.createElement("div"))
           const prev = ex1val
           const update = ex1val = ex1next
           const next = ex1next = b3ltr(ex1val)
+          const zlo = prev.match(/^0*/)[0].length
+          const zhi = update.match(/^0*/)[0].length
           ex1el.classList.add("started")
           carrier.style.setProperty("--digit", -1)
           function goto(pos) {
             ex1warmup = undefined
             while (ex1cols.children.length <= pos) ex1digit()
             carrier.style.setProperty("--digit", pos)
+            if (pos >= ex1pressure)
+              ex1el.style.setProperty("--pressure", ex1pressure = pos + 1)
             const timeout0 = window.setTimeout(() => {
               ex1timeouts.delete(timeout0)
+              if (pos > zlo && pos <= zhi) {
+                ex1el.style.setProperty("--zeros", pos)
+              }
               if (prev[pos] === "1") {
                 carrier.classList.toggle("carry")
               }
@@ -286,7 +302,6 @@
       1         1
 </pre>
 
-      <!-- TODO: auto-scroll x-overflow -->
       <div id="ex1">
         <div id="ex1play"></div>
         <div id="ex1carry"><div></div></div>
@@ -361,8 +376,13 @@
         --timing-x: 0.5s;
         --timing-y: 0.5s;
         --cols-cover: calc(round(down, (var(--max-width-em) - 1) / 3) - 1);
+        --pressure: 0;
+        --zeros: 0;
+        --cols: 1;
+        --scroll: calc(clamp(0, var(--pressure) - var(--cols), var(--zeros)));
         margin: 1em 0;
         position: relative;
+        overflow-x: hidden;
       }
 
       #ex1play {
@@ -478,7 +498,7 @@
         width: 2em;
         height: 2em;
         top: 4em;
-        left: calc(4em + 3em * var(--digit));
+        left: calc(4em + 3em * max(-1, var(--digit) - var(--scroll)));
         position: absolute;
         z-index: 1;
         transform: rotate(0deg);
@@ -513,6 +533,12 @@
       #ex1cols {
         margin-left: 3em;
         text-wrap: nowrap;
+        overflow-x: hidden;
+      }
+
+      #ex1cols > div:first-child {
+        margin-left: calc(var(--scroll) * -3em);
+        transition: margin-left var(--timing-x);
       }
 
       #ex1cols > div {
