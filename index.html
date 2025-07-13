@@ -523,11 +523,10 @@
       #ex1carry > div::after {
         content: '';
         position: absolute;
-        width: 0.2em;
-        height: 1.8em;
-        left: 0.9em;
+        width: calc(0.2em / sqrt(2));
+        height: calc(2em - 0.2em / sqrt(2));
+        left: calc(1em - 0.1em / sqrt(2));
         background: #000;
-        transform: scaleX(calc(1 / sqrt(2)));
       }
 
       #ex1cols {
