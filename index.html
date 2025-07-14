@@ -125,10 +125,10 @@
         document.getElementById("ex1reset").addEventListener("click", e => {
           ex1(ex1init)
         })
-        // TODO: if !auto skip as many scrolled-past zeros as possible
         // TODO: the last carry can scroll non-zeros off-screen left
         const ex1run = auto => {
           if (ex1cooldown !== undefined) return
+          const last = ex1carry.lastElementChild
           const carrier = ex1carry.appendChild(document.createElement("div"))
           const prev = ex1val
           const update = ex1val = ex1next
@@ -137,6 +137,7 @@
           const zhi = update.match(/^0*/)[0].length
           ex1el.classList.add("started")
           carrier.style.setProperty("--digit", -1)
+          carrier.style.setProperty("--bound", -1)
           function goto(pos) {
             ex1warmup = undefined
             while (ex1cols.children.length <= pos) ex1digit()
@@ -145,6 +146,7 @@
               ex1el.style.setProperty("--pressure", ex1pressure = pos + 1)
             const timeout0 = window.setTimeout(() => {
               ex1timeouts.delete(timeout0)
+              carrier.style.setProperty("--bound", pos)
               if (pos > zlo && pos <= zhi) {
                 ex1el.style.setProperty("--zeros", pos)
               }
@@ -173,11 +175,15 @@
             ex1timeouts.add(timeout0)
           }
           ex1warmup = window.requestAnimationFrame(() =>
-            ex1warmup = window.requestAnimationFrame(() => goto(0)))
+            ex1warmup = window.requestAnimationFrame(() => goto(
+              auto ? 0 : parseInt(
+                window.getComputedStyle(last).getPropertyValue("--lead")))))
+          const ex1lag = b3time(prev, update, next)
+          carrier.style.setProperty("--lag", ex1lag)
           ex1cooldown = window.setTimeout(() => {
             ex1cooldown = undefined;
             if (auto) ex1run(true)
-          }, (ex1timex + ex1timey * b3time(prev, update, next)) * 1000)
+          }, (ex1timex + ex1timey * ex1lag) * 1000)
         }
         const ex1play = document.getElementById("ex1play")
         ex1play.addEventListener("click", e => ex1run(false))
@@ -492,9 +498,20 @@
 
       #ex1carry {
         --digit: -1;
+        --bound: -1;
+        --lag: 0;
       }
 
+      @property --lead {
+        syntax: '<number>';
+        inherits: true;
+        initial-value: 0;
+      }
+
+      /* TODO: skip as many scrolled-past zeros as possible */
+      /* inputs: lag, bound, zeros, scroll, timing-x, timing-y */
       #ex1carry > div {
+        --lead: 0;
         width: 2em;
         height: 2em;
         top: 4em;
@@ -503,6 +520,10 @@
         z-index: 1;
         transform: rotate(0deg);
         transition: left var(--timing-x), transform var(--timing-y);
+      }
+
+      #ex1carry > div:first-child {
+        --lead: calc(min(max(0, var(--zeros) - 1), round(down, var(--scroll))));
       }
 
       #ex1carry > .carry {
