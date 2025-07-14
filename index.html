@@ -19,6 +19,8 @@
       function rebase(value, inbase, outbase) {
         let output = [];
         for(let remainder of value) {
+          if (remainder < 0)
+            throw new Error("invalid input for base conversion")
           for(let digit = 0; digit < output.length; digit++) {
             remainder = inbase * output[digit] + remainder;
             output[digit] = remainder % outbase;
@@ -29,7 +31,7 @@
             remainder = Math.floor(remainder / outbase);
           }
         }
-        return output.reverse();
+        return output.length ? output.reverse() : value.length ? [0] : [];
       }
 
       function translate(value, inalphabet, outalphabet) {
@@ -51,7 +53,8 @@
       }
 
       function b3seq(x) {
-        console.assert(x !== "")
+        if (x.split("").reduce((a, b) => a && b === "0", true))
+          throw new Error("invalid a_0 passed in")
         let seq = [x], b10 = [b3dec(x)], pre = [0, 0], cur = 0
         while (x !== "1") {
           const y = b3ltr(x)
@@ -82,11 +85,36 @@
         const ex1style = window.getComputedStyle(ex1carry)
         const ex1timex = parseFloat(ex1style.getPropertyValue("--timing-x"))
         const ex1timey = parseFloat(ex1style.getPropertyValue("--timing-y"))
+        function ex1parse() {
+          const active = ex1cols.querySelectorAll(".active")
+          if (active.length === 0) return ex1cols.style.removeProperty("--last")
+          const last = active[active.length - 1]
+          const digits = parseInt(last.style.getPropertyValue("--nth"))
+          ex1cols.style.setProperty("--last", digits)
+          if (digits !== active.length - 1) return
+          const b3 = [...active].map(x => x.style.getPropertyValue("--active"))
+            .join("")
+          e0b10.value = b3dec(e0b03.value = b3)
+          ex0(b3)
+        }
         function ex1digit() {
           const col = ex1cols.appendChild(document.createElement("div"))
-          for (let i = 0; i < 3; i++) {
-            col.appendChild(document.createElement("div"))
+          col.style.setProperty("--nth", ex1cols.children.length - 1)
+          for (let i = 2; i >= 0; i--) {
+            const dot = col.appendChild(document.createElement("div"))
+            dot.addEventListener("click", (i => e => {
+              if (ex1el.classList.contains("started")) return
+              col.style.setProperty("--active", i)
+              col.classList.add("active")
+              ex1parse()
+            })(i))
           }
+          col.addEventListener("click", e => {
+            if (ex1el.classList.contains("started") || e.target !== col) return
+            col.style.removeProperty("--active")
+            col.classList.remove("active")
+            ex1parse()
+          })
           return col;
         }
         const ex1cover = window.getComputedStyle(ex1el)
@@ -120,12 +148,14 @@
           ex1el.classList.remove("started")
           ex1el.style.removeProperty("--zeros")
           ex1el.style.setProperty("--pressure", ex1pressure = x.length)
+          ex1cols.style.removeProperty("--last")
           ex1play.classList.remove("disabled")
         }
         let ex1timeouts = new Set(), ex1cooldown, ex1warmup;
         document.getElementById("ex1reset").addEventListener("click", e => {
           ex1(ex1init)
         })
+        // TODO: error handling (skipped digits, all 0s, or empty)
         const ex1run = auto => {
           if (ex1cooldown !== undefined) return
           const last = ex1carry.lastElementChild
@@ -563,6 +593,7 @@
       }
 
       #ex1cols {
+        --last: -1;
         margin-left: 3em;
         text-wrap: nowrap;
         overflow-x: hidden;
@@ -573,9 +604,11 @@
         transition: margin-left var(--timing-x-s);
       }
 
+      /* https://stackoverflow.com/a/32993828 */
       #ex1cols > div {
         display: inline-block;
         position: relative;
+        pointer-events: none;
       }
 
       #ex1cols > div > div {
@@ -584,6 +617,7 @@
         background: #aaa;
         border-radius: 100%;
         margin: 1em 0 1em 1em;
+        pointer-events: auto;
       }
 
       #ex1cols > .active::after {
@@ -596,6 +630,23 @@
         transition: top var(--timing-y-s);
         background: green;
         border-radius: 100%;
+        pointer-events: auto;
+      }
+
+      #ex1cols > div::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0.5em;
+        z-index: -1;
+        background: red;
+        opacity: 0;
+      }
+
+      #ex1cols > div:not(.active)::before {
+        opacity: calc(clamp(0, abs(var(--last)) - var(--nth), 0.2));
       }
     </style>
   </body>
