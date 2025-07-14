@@ -106,6 +106,7 @@
           ex1timeouts.clear()
           while (ex1carry.children.length > 1)
             ex1carry.removeChild(ex1carry.lastElementChild)
+          while (ex1cols.children.length < x.length) ex1digit()
           ex1val = ex1init = x
           ex1next = b3ltr(x)
           ;[...ex1cols.children].forEach(y => {
@@ -125,7 +126,6 @@
         document.getElementById("ex1reset").addEventListener("click", e => {
           ex1(ex1init)
         })
-        // TODO: the last carry can scroll non-zeros off-screen left
         const ex1run = auto => {
           if (ex1cooldown !== undefined) return
           const last = ex1carry.lastElementChild
@@ -142,11 +142,15 @@
             ex1warmup = undefined
             while (ex1cols.children.length <= pos) ex1digit()
             carrier.style.setProperty("--digit", pos)
+            if (last.previousElementSibling === null)
+              ex1el.style.setProperty("--max-bound", pos)
             if (pos >= ex1pressure)
               ex1el.style.setProperty("--pressure", ex1pressure = pos + 1)
             const timeout0 = window.setTimeout(() => {
               ex1timeouts.delete(timeout0)
               carrier.style.setProperty("--bound", pos)
+              if (carrier.nextElementSibling === null)
+                ex1el.style.setProperty("--min-bound", pos)
               if (pos > zlo && pos <= zhi) {
                 ex1el.style.setProperty("--zeros", pos)
               }
@@ -387,7 +391,11 @@
         --pressure: 0;
         --zeros: 0;
         --cols: 1;
-        --scroll: calc(clamp(0, var(--pressure) - var(--cols), var(--zeros)));
+        --max-bound: 0;
+        --min-bound: 0;
+        --scroll: calc(max(0, min(var(--pressure) - var(--cols),
+          max(var(--zeros), min(
+            var(--max-bound) + 1 - var(--cols), var(--min-bound))))));
         margin: 1em 0;
         position: relative;
         overflow-x: hidden;
