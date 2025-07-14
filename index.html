@@ -86,6 +86,12 @@
           .reduce(([a, b], c) => [a + c, Math.max(b, a + c)], [0, 0])[1]
       }
 
+      function ex1sourcing() {
+        document.getElementById("ex1").classList.add("sourcing")
+        document.getElementById("ex1ff")
+          .appendChild(document.createElement("div"))
+      }
+
       window.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("a").forEach(el => {
           if (el.childNodes.length === 1 && el.firstElementChild === null)
@@ -683,6 +689,28 @@
       #ex1cols.zero > .active::before, #ex1cols.zero > .active + div::before {
         opacity: var(--error-opacity);
         bottom: 3.5em;
+      }
+
+      #ex1.sourcing {
+        padding-bottom: 2em;
+        --timing-x: 0.2;
+        --timing-y: 0.2;
+        overflow-x: initial;
+      }
+
+      #ex1.sourcing::after {
+        content: 'kentslaney.github.io/ideal-bassoon';
+        position: absolute;
+        font-size: 2em;
+        transform: translate(2em, -0.5em);
+      }
+
+      #ex1.sourcing #ex1ff > div {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: inherit;
+        left: -8em;
       }
     </style>
   </body>
