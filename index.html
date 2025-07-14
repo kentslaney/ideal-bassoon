@@ -101,14 +101,26 @@
         const ex1timey = parseFloat(ex1style.getPropertyValue("--timing-y"))
         function ex1parse() {
           const active = ex1cols.querySelectorAll(".active")
-          if (active.length === 0) return ex1cols.style.removeProperty("--last")
+          if (active.length === 0) {
+            ex1cols.classList.add("zero")
+            ex1cols.classList.remove("skips")
+            ex1cols.style.removeProperty("--last")
+            return
+          }
           const last = active[active.length - 1]
           const digits = parseInt(last.style.getPropertyValue("--nth"))
           ex1cols.style.setProperty("--last", digits)
-          if (digits !== active.length - 1) return
+          if (digits !== active.length - 1) {
+            ex1cols.classList.remove("zero")
+            ex1cols.classList.add("skips")
+            return
+          }
+          ex1cols.classList.remove("skips")
           const b3 = [...active].map(x => x.style.getPropertyValue("--active"))
             .join("")
-          e0b10.value = b3dec(e0b03.value = b3)
+          const b10 = b3dec(e0b03.value = b3)
+          e0b10.value = b10
+          if (b10 === 0) return ex1cols.classList.add("zero")
           ex0(b3)
         }
         function ex1digit() {
@@ -163,14 +175,17 @@
           ex1el.style.removeProperty("--zeros")
           ex1el.style.setProperty("--pressure", ex1pressure = x.length)
           ex1cols.style.removeProperty("--last")
+          ex1cols.classList.remove("zero")
+          ex1cols.classList.remove("skips")
           ex1play.classList.remove("disabled")
         }
         let ex1timeouts = new Set(), ex1cooldown, ex1warmup;
         document.getElementById("ex1reset").addEventListener("click", e => {
           ex1(ex1init)
         })
-        // TODO: error handling (skipped digits, all 0s, or empty)
         const ex1run = auto => {
+          if (ex1cols.classList.contains("zero") ||
+            ex1cols.classList.contains("skips")) return
           if (ex1cooldown !== undefined) return
           const last = ex1carry.lastElementChild
           const carrier = ex1carry.appendChild(document.createElement("div"))
@@ -361,7 +376,7 @@
         <div id="ex1carry"><div></div></div>
         <div id="ex1ff"></div>
         <div id="ex1reset"></div>
-        <div id="ex1cols"></div>
+        <div id="ex1cols" class="zero"></div>
       </div>
 
       <!--Numbers ending in 0 can be ignored since dividing by 2 doesn't change
@@ -620,6 +635,7 @@
 
       /* https://stackoverflow.com/a/32993828 */
       #ex1cols > div {
+        --error-opacity: 0.2;
         display: inline-block;
         position: relative;
         pointer-events: none;
@@ -651,8 +667,8 @@
         content: '';
         position: absolute;
         width: 100%;
-        height: 100%;
-        top: 0;
+        top: 0.5em;
+        bottom: 0.5em;
         left: 0.5em;
         z-index: -1;
         background: red;
@@ -660,7 +676,13 @@
       }
 
       #ex1cols > div:not(.active)::before {
-        opacity: calc(clamp(0, abs(var(--last)) - var(--nth), 0.2));
+        opacity: calc(clamp(
+          0, abs(var(--last)) - var(--nth), var(--error-opacity)));
+      }
+
+      #ex1cols.zero > .active::before, #ex1cols.zero > .active + div::before {
+        opacity: var(--error-opacity);
+        bottom: 3.5em;
       }
     </style>
   </body>
