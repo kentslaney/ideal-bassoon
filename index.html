@@ -12,9 +12,22 @@
           fontCache: 'global'
         }
       };
+
+      const fallback_url = "https://cdn.jsdelivr.net/npm/mathjax/es5/tex-svg.js"
+      function mathjax_fallback() {
+        const tag = document.getElementById("MathJax-script")
+        const before = tag.nextElementSibling
+        document.head.removeChild(tag)
+        const cdn = document.createElement("script")
+        cdn.setAttribute("type", "text/javascript")
+        cdn.setAttribute("id", "MathJax-script")
+        cdn.setAttribute("async", "")
+        document.head.insertBefore(cdn, before)
+        cdn.src = fallback_url
+      }
     </script>
-    <!-- TODO: fallback to CDN -->
-    <script type="text/javascript" id="MathJax-script" async src="mathjax/es5/tex-svg.js"></script>
+    <script type="text/javascript" id="MathJax-script"
+      onerror="mathjax_fallback()" async src="mathjax/es5/tex-svg.js"></script>
     <script>
       "use strict"
       function rebase(value, inbase, outbase) {
