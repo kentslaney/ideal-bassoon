@@ -88,7 +88,7 @@
 
       function ex1sourcing() {
         document.getElementById("ex1").classList.add("sourcing")
-        document.getElementById("ex1ff")
+        document.querySelector("#ex1 .ff")
           .appendChild(document.createElement("div"))
       }
 
@@ -100,8 +100,8 @@
 
         // ex1
         const ex1el = document.getElementById("ex1")
-        const ex1cols = document.getElementById("ex1cols")
-        const ex1carry = document.getElementById("ex1carry")
+        const ex1cols = document.querySelector("#ex1 .dots")
+        const ex1carry = document.querySelector("#ex1 .arrows")
         const ex1style = window.getComputedStyle(ex1carry)
         const ex1timex = parseFloat(ex1style.getPropertyValue("--timing-x"))
         const ex1timey = parseFloat(ex1style.getPropertyValue("--timing-y"))
@@ -186,7 +186,7 @@
           ex1play.classList.remove("disabled")
         }
         let ex1timeouts = new Set(), ex1cooldown, ex1warmup;
-        document.getElementById("ex1reset").addEventListener("click", e => {
+        document.querySelector("#ex1 .reset").addEventListener("click", e => {
           ex1(ex1init)
         })
         const ex1run = auto => {
@@ -220,7 +220,7 @@
                 ex1el.style.setProperty("--zeros", pos)
               }
               if (prev[pos] === "1") {
-                carrier.classList.toggle("carry")
+                carrier.classList.toggle("flip")
               }
               if (prev[pos] !== update[pos]) {
                 ex1cols.children[pos].style.setProperty("--active", update[pos])
@@ -254,9 +254,9 @@
             if (auto) ex1run(true)
           }, (ex1timex + ex1timey * ex1lag) * 1000)
         }
-        const ex1play = document.getElementById("ex1play")
+        const ex1play = document.querySelector("#ex1 .play")
         ex1play.addEventListener("click", e => ex1run(false))
-        document.getElementById("ex1ff").addEventListener("click", e => {
+        document.querySelector("#ex1 .ff").addEventListener("click", e => {
           ex1play.classList.add("disabled")
           ex1run(true)
         })
@@ -378,17 +378,12 @@
 </pre>
 
       <div id="ex1">
-        <div id="ex1play"></div>
-        <div id="ex1carry"><div></div></div>
-        <div id="ex1ff"></div>
-        <div id="ex1reset"></div>
-        <div id="ex1cols" class="zero"></div>
+        <div class="play"></div>
+        <div class="arrows"><div></div></div>
+        <div class="ff"></div>
+        <div class="reset"></div>
+        <div class="dots zero"></div>
       </div>
-
-      <!--Numbers ending in 0 can be ignored since dividing by 2 doesn't change
-      divisibility by 3 and \(3a_k+1\not\equiv 0\ (\text{mod}\ 3)\). The number
-      of steps that the starting number ends in 0 is upper bounded by
-      \(\log_2 a_0\).-->
     </div>
     <style>
       .content {
@@ -466,7 +461,7 @@
         overflow-x: hidden;
       }
 
-      #ex1play {
+      .play {
         width: 2em;
         height: 2em;
         top: 1em;
@@ -476,11 +471,11 @@
         border-radius: 100%;
       }
 
-      #ex1play.disabled {
+      .play.disabled {
         background: #aaa;
       }
 
-      #ex1play::before {
+      .play::before {
         content: '';
         position: absolute;
         width: 0;
@@ -502,7 +497,7 @@
         margin-right: calc(var(--padding-value) - var(--tri-offset));
       }
 
-      #ex1ff {
+      .ff {
         width: 2em;
         height: 2em;
         top: 7em;
@@ -512,11 +507,11 @@
         border-radius: 100%;
       }
 
-      #ex1.started #ex1ff {
+      .started .ff {
         display: none;
       }
 
-      #ex1ff::before, #ex1ff::after {
+      .ff::before, .ff::after {
         content: '';
         border-width: 0.6em;
         border-style: solid;
@@ -528,11 +523,11 @@
         top: 0.4em;
       }
 
-      #ex1ff::after {
+      .ff::after {
         left: 1.1em;
       }
 
-      #ex1reset {
+      .reset {
         --back: red;
         width: 2em;
         height: 2em;
@@ -544,11 +539,11 @@
         display: none;
       }
 
-      #ex1.started #ex1reset {
+      .started .reset {
         display: initial;
       }
 
-      #ex1reset::before {
+      .reset::before {
         content: '';
         width: 0.8em;
         height: 0.8em;
@@ -558,7 +553,7 @@
         border: 0.2em solid #fff;
       }
 
-      #ex1reset::after {
+      .reset::after {
         content: '';
         width: 0;
         height: 0;
@@ -571,7 +566,7 @@
         transform: rotate(-30deg);
       }
 
-      #ex1carry {
+      #ex1 .arrows {
         --digit: -1;
         --bound: -1;
         --lag: 0;
@@ -583,31 +578,34 @@
         initial-value: 0;
       }
 
-      #ex1carry > div {
+      #ex1 .arrows > div {
         --lead: calc(max(0, min(
           var(--zeros) - 1,
           round(down, var(--scroll)),
           var(--bound) - 1 - round(
             up, var(--lag) * var(--timing-y) / var(--timing-x)))));
-        width: 2em;
-        height: 2em;
-        top: 4em;
         left: calc(4em + 3em * max(-1, var(--digit) - var(--scroll)));
-        position: absolute;
-        z-index: 1;
-        transform: rotate(0deg);
         transition: left var(--timing-x-s), transform var(--timing-y-s);
       }
 
-      #ex1carry > div:first-child {
+      .arrows > div {
+        width: 2em;
+        height: 2em;
+        top: 4em;
+        position: absolute;
+        z-index: 1;
+        transform: rotate(0deg);
+      }
+
+      #ex1 .arrows > div:first-child {
         --lead: calc(max(0, min(var(--zeros) - 1, round(down, var(--scroll)))));
       }
 
-      #ex1carry > .carry {
+      .arrows > .flip {
         transform: rotate(180deg);
       }
 
-      #ex1carry > div::before {
+      .arrows > div::before {
         content: '';
         position: absolute;
         width: 1.8em;
@@ -618,7 +616,7 @@
         border-color: #000;
       }
 
-      #ex1carry > div::after {
+      .arrows > div::after {
         content: '';
         position: absolute;
         width: calc(0.2em / sqrt(2));
@@ -627,27 +625,27 @@
         background: #000;
       }
 
-      #ex1cols {
+      #ex1 .dots {
         --last: -1;
         margin-left: 3em;
         text-wrap: nowrap;
         overflow-x: hidden;
       }
 
-      #ex1cols > div:first-child {
+      #ex1 .dots > div:first-child {
         margin-left: calc(var(--scroll) * -3em);
         transition: margin-left var(--timing-x-s);
       }
 
       /* https://stackoverflow.com/a/32993828 */
-      #ex1cols > div {
+      #ex1 .dots > div {
         --error-opacity: 0.2;
         display: inline-block;
         position: relative;
         pointer-events: none;
       }
 
-      #ex1cols > div > div {
+      .dots > div > div {
         width: 2em;
         height: 2em;
         background: #aaa;
@@ -656,7 +654,7 @@
         pointer-events: auto;
       }
 
-      #ex1cols > .active::after {
+      #ex1 .dots > .active::after {
         content: '';
         position: absolute;
         width: 2em;
@@ -669,7 +667,7 @@
         pointer-events: auto;
       }
 
-      #ex1cols > div::before {
+      #ex1 .dots > div::before {
         content: '';
         position: absolute;
         width: 100%;
@@ -681,12 +679,13 @@
         opacity: 0;
       }
 
-      #ex1cols > div:not(.active)::before {
+      #ex1 .dots > div:not(.active)::before {
         opacity: calc(clamp(
           0, abs(var(--last)) - var(--nth), var(--error-opacity)));
       }
 
-      #ex1cols.zero > .active::before, #ex1cols.zero > .active + div::before {
+      #ex1 .dots.zero > .active::before,
+      #ex1 .dots.zero > .active + div::before {
         opacity: var(--error-opacity);
         bottom: 3.5em;
       }
@@ -705,7 +704,7 @@
         transform: translate(2em, -0.5em);
       }
 
-      #ex1.sourcing #ex1ff > div {
+      #ex1.sourcing .ff > div {
         position: absolute;
         width: 100%;
         height: 100%;
