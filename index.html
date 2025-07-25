@@ -442,7 +442,7 @@
         initial-value: 1;
       }
 
-      #ex1 {
+      #ex1, #ex2 {
         --timing-x: 0.5;
         --timing-y: 0.5;
         --timing-x-s: calc(var(--timing-x) * 1s);
@@ -459,6 +459,12 @@
         margin: 1em 0;
         position: relative;
         overflow-x: hidden;
+      }
+
+      #ex2 {
+        --cols-cover: calc(var(--cols-cover) - 1);
+        --scroll: calc(max(var(--zeros), min(
+            var(--max-bound) + 1 - var(--cols), var(--min-bound))));
       }
 
       .play {
@@ -566,7 +572,7 @@
         transform: rotate(-30deg);
       }
 
-      #ex1 .arrows {
+      #ex1 .arrows, #ex2 .dots {
         --digit: -1;
         --bound: -1;
         --lag: 0;
@@ -578,14 +584,17 @@
         initial-value: 0;
       }
 
-      #ex1 .arrows > div {
+      #ex1 .arrows > div, #ex2 .dots > div {
         --lead: calc(max(0, min(
           var(--zeros) - 1,
           round(down, var(--scroll)),
           var(--bound) - 1 - round(
             up, var(--lag) * var(--timing-y) / var(--timing-x)))));
-        left: calc(4em + 3em * max(-1, var(--digit) - var(--scroll)));
         transition: left var(--timing-x-s), transform var(--timing-y-s);
+      }
+
+      #ex1 .arrows > div {
+        left: calc(4em + 3em * max(-1, var(--digit) - var(--scroll)));
       }
 
       .arrows > div {
