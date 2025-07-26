@@ -113,6 +113,7 @@
         const ex2resize = new ResizeObserver(entries => entries.map(entry => {
           ex2el.style.setProperty("--cols", entry.contentRect.width / ex1sizing)
         }))
+        ex2resize.observe(ex2cols)
         function ex2(b3) {
           const x = b322(b3)
           while (ex2cols.children.length < ex1cover - 1) ex2digit()
