@@ -93,6 +93,17 @@
           .appendChild(document.createElement("div"))
       }
 
+      function b2rtl(x) {
+        const z = x.replace(/0*$/, "")
+        let carry = 1;
+        const res = z.split("").reverse().map(y => {
+          const res = (y === "1") ^ (carry === 1)
+          carry = Math.max(0, Math.min(2, carry + (y === "1" ? 1 : -1)))
+          return res
+        }).concat(carry ? carry === 1 ? [1] : [0, 1] : []).reverse().join("")
+        return [res, x.length - z.length]
+      }
+
       window.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("a").forEach(el => {
           if (el.childNodes.length === 1 && el.firstElementChild === null)
@@ -114,8 +125,9 @@
           ex2el.style.setProperty("--cols", entry.contentRect.width / ex1sizing)
         }))
         ex2resize.observe(ex2cols)
+        let ex2val = ""
         function ex2(b3) {
-          const x = b322(b3)
+          const x = ex2val = b322(b3)
           while (ex2cols.children.length < ex1cover - 1) ex2digit()
           while (ex2cols.children.length < x.length) ex2digit()
           ;[...ex2cols.children].forEach((y, i) => {
@@ -123,6 +135,15 @@
               y.classList.add("flip")
             else y.classList.remove("flip")
           })
+        }
+        function ex2carrier() {
+          const col = ex2cols.appendChild(document.createElement("div"))
+          for (let i = 2; i >= 0; i--) {
+            const dot = col.appendChild(document.createElement("div"))
+          }
+          col.style.setProperty("--active", "1")
+          col.classList.add("active")
+          return col
         }
 
         // ex1
@@ -723,6 +744,10 @@
         position: absolute;
         top: 0;
         left: calc(-3em - 3em * max(-1, var(--digit) - var(--scroll)));
+      }
+
+      #ex2 .dots > div:not(:first-child).done {
+        left: calc(-2em - 3em * var(--cols));
       }
 
       #ex1 .dots > div:first-child {
