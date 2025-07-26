@@ -98,6 +98,26 @@
             el.innerText = el.innerText.trim()
         })
 
+        // ex2
+        const ex2el = document.getElementById("ex2")
+        const ex2cols = document.querySelector("#ex2 .arrows")
+        const ex2carry = document.querySelector("#ex2 .dots")
+        const ex2style = window.getComputedStyle(ex2carry)
+        const ex2timex = parseFloat(ex2style.getPropertyValue("--timing-x"))
+        const ex2timey = parseFloat(ex2style.getPropertyValue("--timing-y"))
+        function ex2digit() {
+          const col = ex2cols.insertBefore(
+            document.createElement("div"), ex2cols.firstElementChild)
+          return col;
+        }
+        const ex2cover = window.getComputedStyle(ex2el)
+          .getPropertyValue("--cols-cover")
+        const ex2sizing = ex2digit().getBoundingClientRect().width
+        for (var i = 1; i < ex2cover; i++) ex2digit()
+        const ex2resize = new ResizeObserver(entries => entries.map(entry => {
+          ex2el.style.setProperty("--cols", entry.contentRect.width / ex2sizing)
+        }))
+
         // ex1
         const ex1el = document.getElementById("ex1")
         const ex1cols = document.querySelector("#ex1 .dots")
@@ -384,6 +404,16 @@
         <div class="reset"></div>
         <div class="dots zero"></div>
       </div>
+
+      <div id="ex2">
+        <div class="play"></div>
+        <div class="ff"></div>
+        <div class="reset"></div>
+        <div class="arrows"></div>
+        <div class="dots">
+          <div class="active"><div></div><div></div><div></div></div>
+        </div>
+      </div>
     </div>
     <style>
       .content {
@@ -447,7 +477,6 @@
         --timing-y: 0.5;
         --timing-x-s: calc(var(--timing-x) * 1s);
         --timing-y-s: calc(var(--timing-y) * 1s);
-        --cols-cover: calc(round(down, (var(--max-width-em) - 1) / 3) - 1);
         --pressure: 0;
         --zeros: 0;
         --cols: 1;
@@ -461,8 +490,12 @@
         overflow-x: hidden;
       }
 
+      #ex1 {
+        --cols-cover: calc(round(down, (var(--max-width-em) - 1) / 3) - 1);
+      }
+
       #ex2 {
-        --cols-cover: calc(var(--cols-cover) - 1);
+        --cols-cover: calc(round(down, (var(--max-width-em) - 1) / 3) - 2);
         --scroll: calc(max(var(--zeros), min(
             var(--max-bound) + 1 - var(--cols), var(--min-bound))));
       }
@@ -595,13 +628,17 @@
 
       #ex1 .arrows > div {
         left: calc(4em + 3em * max(-1, var(--digit) - var(--scroll)));
+        position: absolute;
+      }
+
+      #ex2 .arrows > div {
+        display: inline-block;
       }
 
       .arrows > div {
         width: 2em;
         height: 2em;
         top: 4em;
-        position: absolute;
         z-index: 1;
         transform: rotate(0deg);
       }
@@ -641,6 +678,23 @@
         overflow-x: hidden;
       }
 
+      #ex2 .arrows {
+        margin: 3em;
+        text-wrap: nowrap;
+        overflow-x: hidden;
+        text-align: right;
+      }
+
+      #ex2 .dots {
+        position: absolute;
+        right: 1em;
+        top: 0;
+      }
+
+      #ex2 .dots > div:first-child {
+        --active: 1;
+      }
+
       #ex1 .dots > div:first-child {
         margin-left: calc(var(--scroll) * -3em);
         transition: margin-left var(--timing-x-s);
@@ -663,7 +717,12 @@
         pointer-events: auto;
       }
 
-      #ex1 .dots > .active::after {
+      #ex2 .arrows > div {
+        margin: 1em 1em 1em 0;
+        text-align: initial;
+      }
+
+      .dots > .active::after {
         content: '';
         position: absolute;
         width: 2em;
