@@ -56,6 +56,7 @@
 
       const b3enc = x => translate(x.toString(), "0123456789", "012")
       const b3dec = x => parseInt(translate(x, "012", "0123456789"))
+      const b322 = x => translate(x, "012", "01")
 
       function b3ltr(x) {
         let carry = 0;
@@ -106,17 +107,22 @@
         const ex2timex = parseFloat(ex2style.getPropertyValue("--timing-x"))
         const ex2timey = parseFloat(ex2style.getPropertyValue("--timing-y"))
         function ex2digit() {
-          const col = ex2cols.insertBefore(
-            document.createElement("div"), ex2cols.firstElementChild)
+          const col = ex2cols.appendChild(document.createElement("div"))
           return col;
         }
-        const ex2cover = window.getComputedStyle(ex2el)
-          .getPropertyValue("--cols-cover")
-        const ex2sizing = ex2digit().getBoundingClientRect().width
-        for (var i = 1; i < ex2cover; i++) ex2digit()
         const ex2resize = new ResizeObserver(entries => entries.map(entry => {
-          ex2el.style.setProperty("--cols", entry.contentRect.width / ex2sizing)
+          ex2el.style.setProperty("--cols", entry.contentRect.width / ex1sizing)
         }))
+        function ex2(b3) {
+          const x = b322(b3)
+          while (ex2cols.children.length < ex1cover - 1) ex2digit()
+          while (ex2cols.children.length < x.length) ex2digit()
+          ;[...ex2cols.children].forEach((y, i) => {
+            if (i < x.length && x[x.length - 1 - i] === "1")
+              y.classList.add("flip")
+            else y.classList.remove("flip")
+          })
+        }
 
         // ex1
         const ex1el = document.getElementById("ex1")
@@ -282,6 +288,7 @@
         })
 
         // ex0
+        const ex0nt = x => { ex1(x); ex2(x) }
         const e0b10 = document.getElementById("ex0base10")
         const e0b03 = document.getElementById("ex0base03")
         const ex0el = document.getElementById("ex0")
@@ -296,7 +303,7 @@
           const res = lines.map((x, i) =>
             x + " ".repeat(align - x.length - s10[i].length) + s10[i])
           ex0el.innerText = res.join("\n")
-          ex1(x)
+          ex0nt(x)
         }
 
         e0b10.addEventListener("focus", selall, { "passive": true })
@@ -311,8 +318,13 @@
           e0b10.value = e0b03.value && b3dec(x)
           ex0(x)
         }, { "passive": true })
-        if (e0b10.value && e0b10.value !== e0b10.placeholder) ex0(e0b03.value)
-        else ex1(e0b03.placeholder)
+        if (e0b10.value && e0b10.value !== e0b10.placeholder) {
+          try {
+            ex0(e0b03.value)
+          } finally {
+            ex2(e0b03.value)
+          }
+        } else ex0nt(e0b03.placeholder)
       })
     </script>
   </head>
@@ -408,11 +420,12 @@
       <div id="ex2">
         <div class="play"></div>
         <div class="ff"></div>
+        <div class="eos"></div>
         <div class="reset"></div>
-        <div class="arrows"></div>
         <div class="dots">
           <div class="active"><div></div><div></div><div></div></div>
         </div>
+        <div class="arrows"></div>
       </div>
     </div>
     <style>
@@ -495,9 +508,8 @@
       }
 
       #ex2 {
-        --cols-cover: calc(round(down, (var(--max-width-em) - 1) / 3) - 2);
         --scroll: calc(max(var(--zeros), min(
-            var(--max-bound) + 1 - var(--cols), var(--min-bound))));
+          var(--max-bound) + 1 - var(--cols), var(--min-bound))));
       }
 
       .play {
@@ -508,6 +520,7 @@
         position: absolute;
         background: #007aff;
         border-radius: 100%;
+        z-index: 1;
       }
 
       .play.disabled {
@@ -544,6 +557,7 @@
         position: absolute;
         background: #007aff;
         border-radius: 100%;
+        z-index: 1;
       }
 
       .started .ff {
@@ -576,6 +590,10 @@
         background: var(--back);
         border-radius: 100%;
         display: none;
+      }
+
+      #ex2 .ff, #ex2 .reset {
+        top: 4em;
       }
 
       .started .reset {
@@ -624,6 +642,10 @@
           var(--bound) - 1 - round(
             up, var(--lag) * var(--timing-y) / var(--timing-x)))));
         transition: left var(--timing-x-s), transform var(--timing-y-s);
+      }
+
+      #ex2 .arrows > div {
+        transition: transform var(--timing-y-s);
       }
 
       #ex1 .arrows > div {
@@ -683,6 +705,7 @@
         text-wrap: nowrap;
         overflow-x: hidden;
         text-align: right;
+        direction: rtl;
       }
 
       #ex2 .dots {
@@ -695,9 +718,20 @@
         --active: 1;
       }
 
+      #ex2 .dots > div:not(:first-child) {
+        position: absolute;
+        top: 0;
+        left: calc(-3em - 3em * max(-1, var(--digit) - var(--scroll)));
+      }
+
       #ex1 .dots > div:first-child {
         margin-left: calc(var(--scroll) * -3em);
         transition: margin-left var(--timing-x-s);
+      }
+
+      #ex2 .arrows > div:first-child {
+        margin-right: calc(1em + var(--scroll) * -3em);
+        transition: margin-right var(--timing-x-s);
       }
 
       /* https://stackoverflow.com/a/32993828 */
@@ -722,7 +756,7 @@
         text-align: initial;
       }
 
-      .dots > .active::after {
+      .dots > .active::after, .eos {
         content: '';
         position: absolute;
         width: 2em;
@@ -733,6 +767,37 @@
         background: green;
         border-radius: 100%;
         pointer-events: auto;
+      }
+
+      .eos {
+        transition: initial;
+        top: 7em;
+        opacity: 0.5;
+        z-index: -1;
+      }
+
+      .eos::before, .eos::after {
+        content: '';
+        position: absolute;
+        background: #fff;
+        width: calc(0.2em / sqrt(2));
+        height: 1.2em;
+        margin: 0.4em calc(1em - 0.1em / sqrt(2));
+        transform: rotate(45deg);
+      }
+
+      .eos::after {
+        transform: rotate(-45deg);
+      }
+
+      #ex2::after {
+        content: '';
+        background: #fff;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 3em;
+        height: 6.5em;
       }
 
       #ex1 .dots > div::before {
