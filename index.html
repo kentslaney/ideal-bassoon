@@ -495,16 +495,18 @@
       </div>
       <hr>
 
-      In base 2, the process can be rephrased as repeatedly
+      The goal of this page is to make the Collatz sequence's mapping easier to
+      think about. The lowest-context, longhand formulation is in binary.
+      Repeatedly:
       <ol>
-        <li>Removing trailing 0s (removes factors of 2 until odd)</li>
-        <li>Appending 1 to the end of the number (\(=2a_k+1\))</li>
-        <li>Adding the result to the previous number (\(=3a_k+1\))</li>
+        <li>Remove trailing 0s (removes factors of 2 until odd)</li>
+        <li>Append 1 to the end of the number (\(=2a_k+1\))</li>
+        <li>Add the result to the previous number (\(=3a_k+1\))</li>
       </ol>
       For example (via
       <a href="https://en.wikipedia.org/w/index.php?title=Collatz_conjecture&oldid=1298684967#Example">
         Wikipedia
-      </a>), \(7=111_2\)
+      </a>), using \(7=111_2\)
 <pre>
          111         7
         <u>111<b>1</b></u>
@@ -518,28 +520,37 @@
  <u>101<b>1</b></u>
 1<s>0000</s>                1
 </pre>
-      <!--
-      TODO: better explanation
-      analogy to long division
-      each step here corresponds to an even one, with odd as necessary
-      -->
-      Using
+      The rows in this method correspond to steps on odds, with evens grouped
+      into removed columns. The process can also be rephrased in order to be
+      convenient for a state-machine instead of manual computation. Above, the
+      result depends on the (hidden) carry from the previous digit, the digit
+      from step 1, and the digit from step 2. In an adder, the carry is the
+      result's overflow from modulo 2, but step 2 can be hidden by changing the
+      carry to mean the overflow plus the input digit. In this case, only the
+      number and carry are being added and the carry is 0, 1, or 2, starting
+      with 1 from the 1 appended in step 2.
+      <br /><br />
+      While base 2 simplifies division, base 3 simplifies the addition. Dividing
+      by 2 in base 3 is most familiar as long division, where the remainder
+      switches between 0 and 1 at each 1 digit in the input. If the input ends
+      with a remainder, appending a 1 to the input accounts for \(3a_k + 1\) and
+      appends a 2 to the output. Below, in the text format for the base 3
+      process, digits with an incoming remainder denoted by an underline. In
+      contrast to base 2, the rows in this version correspond to steps on evens,
+      with steps on odds adding columns.
+      <br /><br />
+
+      Using \(a_0=\)
       <input type="number" value="7"  placeholder="7"  id="ex0base10">
       </input>
-      =
+      \(=\)
       <input type="number" value="111" placeholder="111" id="ex0base02">
       </input>
-      <sub>2</sub>
-      =
+      \(_2=\)
       <input type="number" value="21" placeholder="21" id="ex0base03">
       </input>
-      <sub>3</sub>
+      \(_3\)
 
-      <!--
-      TODO: explanation
-      https://cdsmithus.medium.com/01d44cdfbe5a
-      each step here corresponds to an odd one, with even as necessary
-      -->
       <div id="ex2">
         <div class="play"></div>
         <div class="ff"></div>
@@ -560,6 +571,14 @@
       </div>
 
       <pre id="ex0"></pre>
+
+      These 3 representations are actually presented in reverse order of
+      creation (GitHub releases for verified timestamps).
+      <!-- https://archive.ph/0oOOV -->
+      <a href="https://cdsmithus.medium.com/01d44cdfbe5a">
+        This article by Chris Smith
+      </a>
+      was a part of the process in going from the base 3 visual to base 2.
     </div>
     <style>
       .content {
@@ -949,6 +968,7 @@
         left: 0;
         top: 0;
         width: 3em;
+        /* TODO: expand and bring .ff forwards if a carry goes off-screen */
         height: 6.5em;
       }
 
