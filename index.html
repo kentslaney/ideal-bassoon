@@ -54,6 +54,8 @@
         return rebased.map(x => outalphabet[x]).join("");
       }
 
+      const b2enc = x => translate(x.toString(), "0123456789", "01")
+      const b2dec = x => parseInt(translate(x, "01", "0123456789"))
       const b3enc = x => translate(x.toString(), "0123456789", "012")
       const b3dec = x => parseInt(translate(x, "012", "0123456789"))
       const b322 = x => translate(x, "012", "01")
@@ -406,6 +408,7 @@
         // ex0
         const ex0nt = x => { ex1(x); ex2(x) }
         const e0b10 = document.getElementById("ex0base10")
+        const e0b02 = document.getElementById("ex0base02")
         const e0b03 = document.getElementById("ex0base03")
         const ex0el = document.getElementById("ex0")
         const selall = e => { e.target.select() }
@@ -416,31 +419,59 @@
           const lines = seq.map((x, i) => " ".repeat(pre[i]) + x)
           const align = ex0pad + lines.slice(-1)[0].length + Math.max(
             ...s10.map(x => x.length))
-          const res = lines.map((x, i) =>
-            x + " ".repeat(align - x.length - s10[i].length) + s10[i])
-          ex0el.innerText = res.join("\n")
+          ex0el.innerHTML = ""
+          ex0el.appendChild(document.createTextNode(lines.map((x, i) => {
+            const splits = x.split("1")
+            const carry = splits.map((y, j) =>
+              y + (j === splits.length - 1 ? "" : "1"))
+            const eol = " ".repeat(align - x.length - s10[i].length) + s10[i] +
+              (i === lines.length - 1 ? "" : "\n")
+            return carry.length % 2 ?
+              carry.slice(0, -1).concat([carry[carry.length - 1] + eol]) :
+              carry.concat([eol])
+          }).reduce((a, b) => {
+            if (b.length === 1) return a + b[0]
+            ex0el.appendChild(document.createTextNode(a + b[0]))
+            for (let i = 1; i < b.length - 1; i++) {
+              if (i % 2)
+                ex0el.appendChild(document.createElement("u")).innerText = b[i]
+              else ex0el.appendChild(document.createTextNode(b[i]))
+            }
+            return b[b.length - 1]
+          }, "")))
           ex0nt(x)
         }
 
         e0b10.addEventListener("focus", selall, { "passive": true })
+        e0b02.addEventListener("focus", selall, { "passive": true })
         e0b03.addEventListener("focus", selall, { "passive": true })
         e0b10.addEventListener("input", e => {
-          const x = b3enc(e0b10.value || e0b10.placeholder)
-          e0b03.value = e0b10.value && x
-          ex0(x)
+          const x = e0b10.value || e0b10.placeholder
+          const y = b3enc(x)
+          e0b02.value = e0b10.value && b2enc(x)
+          e0b03.value = e0b10.value && y
+          ex0(y)
+        }, { "passive": true })
+        e0b02.addEventListener("input", e => {
+          const x = b2dec(e0b02.value || e0b02.placeholder)
+          const y = b3enc(x)
+          e0b03.value = e0b02.value && y
+          e0b10.value = e0b02.value && x
+          ex0(y)
         }, { "passive": true })
         e0b03.addEventListener("input", e => {
           const x = e0b03.value || e0b03.placeholder
-          e0b10.value = e0b03.value && b3dec(x)
+          const y = b3dec(x)
+          e0b02.value = e0b03.value && b2enc(y)
+          e0b10.value = e0b03.value && y
           ex0(x)
         }, { "passive": true })
-        if (e0b10.value && e0b10.value !== e0b10.placeholder) {
-          try {
-            ex0(e0b03.value)
-          } finally {
-            ex2(e0b03.value)
-          }
-        } else ex0nt(e0b03.placeholder)
+        const init = e0b03.value || e0b03.placeholder
+        try {
+          ex0(init)
+        } finally {
+          ex2(init)
+        }
       })
     </script>
   </head>
@@ -493,37 +524,16 @@
       each step here corresponds to an even one, with odd as necessary
       -->
       Using
-      <input type="number" value="7"  placeholder="7"  size="2" id="ex0base10">
+      <input type="number" value="7"  placeholder="7"  id="ex0base10">
       </input>
       =
-      <input type="number" value="21" placeholder="21" size="4" id="ex0base03">
+      <input type="number" value="111" placeholder="111" id="ex0base02">
+      </input>
+      <sub>2</sub>
+      =
+      <input type="number" value="21" placeholder="21" id="ex0base03">
       </input>
       <sub>3</sub>
-      <!--
-      TODO: move to after ex2 to avoid cutoff scrolling on change
-      -->
-<pre id="ex0">
-21              7
-102            11
-0122           17
- 0222          26
-  111          13
-  0202         20
-   101         10
-   012          5
-    022         8
-     11         4
-     02         2
-      1         1
-</pre>
-
-      <div id="ex1">
-        <div class="play"></div>
-        <div class="arrows"><div></div></div>
-        <div class="ff"></div>
-        <div class="reset"></div>
-        <div class="dots zero"></div>
-      </div>
 
       <!--
       TODO: explanation
@@ -540,6 +550,16 @@
         </div>
         <div class="arrows"></div>
       </div>
+
+      <div id="ex1">
+        <div class="play"></div>
+        <div class="arrows"><div></div></div>
+        <div class="ff"></div>
+        <div class="reset"></div>
+        <div class="dots zero"></div>
+      </div>
+
+      <pre id="ex0"></pre>
     </div>
     <style>
       .content {
@@ -591,6 +611,15 @@
 
       input[type=number]:not(#ex0base10) {
         appearance: textfield;
+      }
+
+      #ex0base10 { width: 3em; }
+      #ex0base02 { width: 5em; }
+      #ex0base03 { width: 4em; }
+
+      #ex0 {
+        max-width: 100%;
+        overflow-x: scroll;
       }
 
       @property --cols-cover {
