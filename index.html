@@ -521,7 +521,7 @@
 1<s>0000</s>                1
 </pre>
       The rows in this method correspond to steps on odds, with evens grouped
-      into removed columns.<!-- The process can also be rephrased in order to be
+      into removed columns. The process can also be rephrased in order to be
       convenient for a state-machine instead of manual computation. Above, the
       result depends on the (hidden) carry from the previous digit, the digit
       from step 1, and the digit from step 2. In an adder, the carry is the
@@ -529,7 +529,7 @@
       carry to mean the overflow plus the input digit. In this case, only the
       number and carry are being added and the carry is 0, 1, or 2, starting
       with 1 from the 1 appended in step 2.
-      <br /><br /-->
+      <br /><br />
       While base 2 simplifies division, base 3 simplifies the addition. Dividing
       by 2 in base 3 is most familiar as long division, where the remainder
       switches between 0 and 1 at each 1 digit in the input. If the input ends
@@ -544,15 +544,14 @@
       <input type="number" value="7"  placeholder="7"  id="ex0base10">
       </input>
       \(=\)
-      <input type="number" value="111" placeholder="111" id="ex0base02"
-        style="display: none">
+      <input type="number" value="111" placeholder="111" id="ex0base02">
       </input>
-      <!-- \(_2=\) -->
+      \(_2=\)
       <input type="number" value="21" placeholder="21" id="ex0base03">
       </input>
       \(_3\)
 
-      <div id="ex2" style="display: none">
+      <div id="ex2">
         <div class="play"></div>
         <div class="ff"></div>
         <div class="eos"></div>
@@ -573,13 +572,13 @@
 
       <pre id="ex0"></pre>
 
-      <!-- These 3 representations are actually presented in reverse order of
-      creation (GitHub releases for verified timestamps). -->
+      These 3 representations are actually presented in reverse order of
+      creation (GitHub releases for verified timestamps).
       <!-- https://archive.ph/0oOOV -->
-      <!-- <a href="https://cdsmithus.medium.com/01d44cdfbe5a">
+      <a href="https://cdsmithus.medium.com/01d44cdfbe5a">
         This article by Chris Smith
       </a>
-      was a part of the process in going from the base 3 visual to base 2.-->The
+      was a part of the process in going from the base 3 visual to base 2. The
       repo name/URL is the random one suggested by GitHub to avoid
       <code>collatz(-new)*</code>.
     </div>
