@@ -106,8 +106,22 @@
         return [res, x.length - z.length]
       }
 
+      const b2c = (c, d) => (e => e * 2 !== c ? 0 : e ? 1 : -1)(d === "1")
+
       function b2time(x, x0s, y) {
-        const w = x.slice(0, -x0s || undefined)
+        const w = x.split("").reverse().join("").slice(x0s)
+        let c0 = 1 + (x0s > 0), c1 = 1, y0s = 0
+        y.split("").reverse().map((z, i) => {
+          const delta0 = b2c(c0, w[i])
+          c0 += delta0
+          if (y0s <= 0) {
+            if (z === "0") {
+              y0s--
+              return Math.abs(delta0)
+            } else y0s = -y0s
+          }
+          c1 += b2c(c1, z)
+        })
         /*
         TODO
         I can "zip" (truncation not thought through) w and y, then initialize
@@ -115,7 +129,7 @@
         There's no case where an output flip happens without a carry change.
         I need 1 x-lag for spacing plus y0s.
         */
-        return [1, 0]
+        return [y0s + 1, 0]
       }
 
       window.addEventListener("DOMContentLoaded", () => {
