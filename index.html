@@ -89,10 +89,10 @@
           .reduce(([a, b], c) => [a + c, Math.max(b, a + c)], [0, 0])[1]
       }
 
-      function ex1sourcing() {
-        document.getElementById("ex1").classList.add("sourcing")
-        document.querySelector("#ex1 .ff")
-          .appendChild(document.createElement("div"))
+      function sourcing(n) {
+        const el = document.getElementById(`ex${n}`)
+        el.classList.add("sourcing")
+        el.querySelector(".ff").appendChild(document.createElement("div"))
       }
 
       function b2rtl(x) {
@@ -137,6 +137,7 @@
             el.innerText = el.innerText.trim()
         })
 
+        // sourcing(#)
         // ex2
         const ex2el = document.getElementById("ex2")
         const ex2cols = document.querySelector("#ex2 .arrows")
@@ -990,13 +991,14 @@
         transform: rotate(-45deg);
       }
 
-      #ex2::after {
+      #ex2::before {
         content: '';
         background: #fff;
         position: absolute;
         left: 0;
         top: 0;
         width: 3em;
+        z-index: 1;
         height: calc(6.5em + 3em * var(--overflow));
       }
 
@@ -1023,21 +1025,29 @@
         bottom: 3.5em;
       }
 
-      #ex1.sourcing {
+      .sourcing {
         padding-bottom: 2em;
-        --timing-x: 0.2;
-        --timing-y: 0.2;
-        overflow-x: initial;
+        --timing-x: 0.2 !important;
+        --timing-y: 0.2 !important;
+        overflow-x: initial !important;
       }
 
-      #ex1.sourcing::after {
+      #ex2.sourcing {
+        padding-top: 1px;
+      }
+
+      #ex2.sourcing .arrows {
+        transform: translateY(-1px);
+      }
+
+      .sourcing::after {
         content: 'kentslaney.github.io/ideal-bassoon';
         position: absolute;
         font-size: 2em;
         transform: translate(2em, -0.5em);
       }
 
-      #ex1.sourcing .ff > div {
+      .sourcing .ff > div {
         position: absolute;
         width: 100%;
         height: 100%;
