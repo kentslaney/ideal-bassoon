@@ -202,14 +202,19 @@
           ex2el.classList.add("started")
           while (ex2cols.children.length < ex2cover + ex2zeros) ex2digit()
           function goto(pos) {
-            /*
-            TODO: use done class, remove carrier, and exit based on pos
-            The default behavior of the ex1 can cause greedy scrolling to the
-              min-bound which looks bad in this one for auto mode since there's
-              no queue with lagging carries.
-            The carrier gets removed ex2timex after the done class is set.
-            The carrier is removed based on --cols and the length of update.
-            */
+            if (pos >= update.length + znext) {
+              const full = parseInt(
+                window.getComputedStyle(ex2el).getPropertyValue("--last-full"))
+              if (pos === full) {
+                carrier.classList.add("done")
+                const timeout2 = window.setTimeout(() => {
+                  ex2timeouts.delete(timeout2)
+                  ex2carry.removeChild(carrier)
+                }, ex2timex * 1000)
+                ex2timeouts.add(timeout2)
+                return
+              }
+            }
             ex2warmup = undefined
             while (ex2cols.children.length <= pos) ex2digit()
             carrier.style.setProperty("--digit", pos)
@@ -688,12 +693,17 @@
         --cols-cover: calc(round(down, (var(--max-width-em) - 1) / 3) - 1);
       }
 
+      @property --last-full {
+        syntax: '<number>';
+        inherits: true;
+        initial-value: 0;
+      }
+
       #ex2 {
-        --scroll: var(--zeros); /* TODO */
-        /* was
-        --scroll: calc(max(var(--zeros), min(
-          var(--max-bound) + 1 - var(--cols), var(--min-bound))));
-        */
+        /* not scrolling to follow carries since the number of zeros matters */
+        --scroll: var(--zeros);
+        --last-full: calc(round(down, var(--scroll) + var(--cols)));
+        --overflow: calc(max(0, sign(var(--max-bound) + 1 - var(--last-full))));
       }
 
       .play {
@@ -963,7 +973,7 @@
         transition: initial;
         top: 7em;
         opacity: 0.5;
-        z-index: -1;
+        z-index: calc(-1 + 3 * var(--overflow));
       }
 
       .eos::before, .eos::after {
@@ -987,8 +997,7 @@
         left: 0;
         top: 0;
         width: 3em;
-        /* TODO: expand and bring .ff forwards if a carry goes off-screen */
-        height: 6.5em;
+        height: calc(6.5em + 3em * var(--overflow));
       }
 
       #ex1 .dots > div::before {
