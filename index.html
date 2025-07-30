@@ -106,16 +106,29 @@
         return [res, x.length - z.length]
       }
 
+      const b2c = (c, d) => (e => e * 2 === c ? 0 : e ? 1 : -1)(d === "1")
+
       function b2time(x, x0s, y) {
-        const w = x.slice(0, -x0s || undefined)
         /*
-        TODO
-        I can "zip" (truncation not thought through) w and y, then initialize
-          the first carry to 1 + (x0s > 0) and the second one to 1 after y0s.
-        There's no case where an output flip happens without a carry change.
-        I need 1 x-lag for spacing plus y0s.
+        time here...    v x0s <--- (potentially 0, time ignored by both carries)
+               (+)    <-| |    b2time is trying to figure out how much
+                1 0 0 0 1 0 <- carry changes caused by this row
+              1 1 0 1 0 0   <- slow down carries caused by this one
+                 (-)  |-|
+        cancelled here  y0s (> 0 skipped by latter carry in first step)
         */
-        return [1, 0]
+        const y0s = y.match(/0*$/)[0].length
+        const v = x.split("").reverse().join("").slice(x0s)
+        const w = y.split("").reverse().join("")
+        let c0 = 1, c1 = 1
+        return [y0s + 1, [...Array(w.length)].map((_, i) => {
+          const delta0 = b2c(c0, v[i] || '0')
+          c0 += delta0
+          if (i <= y0s) return Math.abs(delta0)
+          const delta1 = b2c(c1, w[i - 1])
+          c1 += delta1
+          return Math.abs(delta0) - Math.abs(delta1)
+        }).reduce(([a, b], c) => [a + c, Math.max(b, a + c)], [0, 0])[1]]
       }
 
       window.addEventListener("DOMContentLoaded", () => {
@@ -162,6 +175,7 @@
           ex2el.style.removeProperty("--zeros")
           ex2el.style.removeProperty("--min-bound")
           ex2el.style.removeProperty("--max-bound")
+          ex2play.classList.remove("disabled")
         }
         function ex2carrier() {
           const col = ex2carry.appendChild(document.createElement("div"))
@@ -184,7 +198,7 @@
           const [update, shift] = b2rtl(ex2val)
           let carry = 1
           ex2val = update
-          ex2zeros += shift
+          const znext = ex2zeros += shift
           ex2el.classList.add("started")
           while (ex2cols.children.length < ex2cover + ex2zeros) ex2digit()
           function goto(pos) {
@@ -196,7 +210,6 @@
             The carrier gets removed ex2timex after the done class is set.
             The carrier is removed based on --cols and the length of update.
             */
-            if (ex2warmup !== undefined) ex2el.style.setProperty("--zeros", pos)
             ex2warmup = undefined
             while (ex2cols.children.length <= pos) ex2digit()
             carrier.style.setProperty("--digit", pos)
@@ -226,7 +239,11 @@
             ex2timeouts.add(timeout0)
           }
           ex2warmup = window.requestAnimationFrame(() =>
-            ex2warmup = window.requestAnimationFrame(() => goto(zinit + shift)))
+            ex2warmup = window.requestAnimationFrame(() => {
+              ex2el.style.setProperty("--zeros", znext)
+              goto(znext)
+            }
+          ))
           const [ex2lagx, ex2lagy] = b2time(prev, shift, update)
           ex2cooldown = window.setTimeout(() => {
             ex2cooldown = undefined;
@@ -235,9 +252,9 @@
         }
         const ex2play = document.querySelector("#ex2 .play")
         ex2play.addEventListener("click", e => ex2run(false))
-        document.querySelector("#ex1 .ff").addEventListener("click", e => {
-          ex1play.classList.add("disabled")
-          ex1run(true)
+        document.querySelector("#ex2 .ff").addEventListener("click", e => {
+          ex2play.classList.add("disabled")
+          ex2run(true)
         })
 
         // ex1
