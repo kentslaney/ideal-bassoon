@@ -451,7 +451,9 @@
               (i === lines.length - 1 ? "" : "\n")
             return carry.length % 2 ?
               carry.slice(0, -1).concat([carry[carry.length - 1] + eol]) :
-              carry.concat([eol])
+              i === lines.length - 1 ? carry.concat([eol]):
+              carry.slice(0, -1).concat(
+                [carry[carry.length - 1] + " ", eol.slice(1)])
           }).reduce((a, b) => {
             if (b.length === 1) return a + b[0]
             ex0el.appendChild(document.createTextNode(a + b[0]))
